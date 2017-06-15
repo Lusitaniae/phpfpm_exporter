@@ -67,7 +67,7 @@ var (
 			"Number of active processes.",
 			[]string{"socket_path"}, nil),
 		"max active processes": prometheus.NewDesc(
-			prometheus.BuildFQName("php", "fpm", "max_acitve_processes"),
+			prometheus.BuildFQName("php", "fpm", "max_active_processes"),
 			"Maximum number of active processes since FPM has started.",
 			[]string{"socket_path"}, nil),
 		"max children reached": prometheus.NewDesc(
