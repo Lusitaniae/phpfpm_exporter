@@ -199,7 +199,7 @@ func main() {
 		listenAddress = flag.String("web.listen-address", ":9253", "Address to listen on for web interface and telemetry.")
 		metricsPath   = flag.String("web.telemetry-path", "/metrics", "Path under which to expose metrics.")
 		socketPaths   = flag.String("phpfpm.socket-paths", "", "Paths of the PHP-FPM sockets.")
-		scriptName = flag.String("phpfpm.scriptname", "/server-status-fpm.php", "Scriptname for fcgi socket communication.")
+		scriptName    = flag.String("phpfpm.scriptname", "/server-status-fpm.php", "Scriptname for fcgi socket communication.")
 	)
 	flag.Parse()
 
