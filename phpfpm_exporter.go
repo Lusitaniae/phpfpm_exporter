@@ -138,7 +138,7 @@ func CollectFromSocket(path string, statusPath string, ch chan<- prometheus.Metr
 	env := make(map[string]string)
 	env["SCRIPT_FILENAME"] = statusPath
 	env["SCRIPT_NAME"] = statusPath
-	env["REQUEST_METHODGET"] = "GET"
+	env["REQUEST_METHOD"] = "GET"
 
 	fcgi, err := fcgiclient.Dial("unix", path)
 	if err != nil {
