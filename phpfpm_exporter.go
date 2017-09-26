@@ -133,11 +133,11 @@ func CollectFromReader(reader io.Reader, socketPath string, ch chan<- prometheus
 	return nil
 }
 
-func CollectFromSocket(path string, scriptName string, ch chan<- prometheus.Metric) error {
+func CollectFromSocket(path string, statusPath string, ch chan<- prometheus.Metric) error {
 
 	env := make(map[string]string)
-	env["SCRIPT_FILENAME"] = scriptName
-	env["SCRIPT_NAME"] = scriptName
+	env["SCRIPT_FILENAME"] = statusPath
+	env["SCRIPT_NAME"] = statusPath
 	env["REQUEST_METHODGET"] = "GET"
 
 	fcgi, err := fcgiclient.Dial("unix", path)
@@ -155,13 +155,13 @@ func CollectFromSocket(path string, scriptName string, ch chan<- prometheus.Metr
 
 type PhpfpmExporter struct {
 	socketPaths []string
-	scriptName  string
+	statusPath  string
 }
 
-func NewPhpfpmExporter(socketPaths []string, scriptName string) (*PhpfpmExporter, error) {
+func NewPhpfpmExporter(socketPaths []string, statusPath string) (*PhpfpmExporter, error) {
 	return &PhpfpmExporter{
 		socketPaths: socketPaths,
-		scriptName:  scriptName,
+		statusPath:  statusPath,
 	}, nil
 }
 
@@ -176,7 +176,7 @@ func (e *PhpfpmExporter) Describe(ch chan<- *prometheus.Desc) {
 
 func (e *PhpfpmExporter) Collect(ch chan<- prometheus.Metric) {
 	for _, socketPath := range e.socketPaths {
-		err := CollectFromSocket(socketPath, e.scriptName, ch)
+		err := CollectFromSocket(socketPath, e.statusPath, ch)
 		if err == nil {
 			ch <- prometheus.MustNewConstMetric(
 				phpfpmUpDesc,
@@ -199,11 +199,11 @@ func main() {
 		listenAddress = flag.String("web.listen-address", ":9253", "Address to listen on for web interface and telemetry.")
 		metricsPath   = flag.String("web.telemetry-path", "/metrics", "Path under which to expose metrics.")
 		socketPaths   = flag.String("phpfpm.socket-paths", "", "Paths of the PHP-FPM sockets.")
-		scriptName    = flag.String("phpfpm.scriptname", "/server-status-fpm.php", "Scriptname for fcgi socket communication.")
+		statusPath    = flag.String("phpfpm.statuspath", "/status", "Path which has been configured in PHP-FPM to show status page.")
 	)
 	flag.Parse()
 
-	exporter, err := NewPhpfpmExporter(strings.Split(*socketPaths, ","), *scriptName)
+	exporter, err := NewPhpfpmExporter(strings.Split(*socketPaths, ","), *statusPath)
 	if err != nil {
 		panic(err)
 	}
