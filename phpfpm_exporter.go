@@ -199,7 +199,7 @@ func main() {
 		listenAddress = flag.String("web.listen-address", ":9253", "Address to listen on for web interface and telemetry.")
 		metricsPath   = flag.String("web.telemetry-path", "/metrics", "Path under which to expose metrics.")
 		socketPaths   = flag.String("phpfpm.socket-paths", "", "Paths of the PHP-FPM sockets.")
-		statusPath    = flag.String("phpfpm.statuspath", "/status", "Path which has been configured in PHP-FPM to show status page.")
+		statusPath    = flag.String("phpfpm.status-path", "/status", "Path which has been configured in PHP-FPM to show status page.")
 	)
 	flag.Parse()
 
