@@ -15,18 +15,21 @@ package main
 
 import (
 	"bufio"
-	"flag"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"path"
 	"regexp"
 	"strconv"
-	"strings"
 	"time"
 
+	"gopkg.in/alecthomas/kingpin.v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/tomasen/fcgi_client"
+	// "github.com/prometheus/common/expfmt"
+	client_model "github.com/prometheus/client_model/go"
+	"github.com/prometheus/common/expfmt"
 )
 
 var (
@@ -81,8 +84,7 @@ var (
 	}
 )
 
-// Converts the output of Dovecot's EXPORT command to metrics.
-func CollectFromReader(reader io.Reader, socketPath string, ch chan<- prometheus.Metric) error {
+func CollectStatusFromReader(reader io.Reader, socketPath string, ch chan<- prometheus.Metric) error {
 	scanner := bufio.NewScanner(reader)
 	re := regexp.MustCompile("^(.*): +(.*)$")
 
@@ -133,7 +135,7 @@ func CollectFromReader(reader io.Reader, socketPath string, ch chan<- prometheus
 	return nil
 }
 
-func CollectFromSocket(path string, statusPath string, ch chan<- prometheus.Metric) error {
+func CollectStatusFromSocket(path string, statusPath string, ch chan<- prometheus.Metric) error {
 
 	env := make(map[string]string)
 	env["SCRIPT_FILENAME"] = statusPath
@@ -144,13 +146,51 @@ func CollectFromSocket(path string, statusPath string, ch chan<- prometheus.Metr
 	if err != nil {
 		return err
 	}
+	defer fcgi.Close()
 
 	resp, err := fcgi.Get(env)
 	if err != nil {
 		return err
 	}
 
-	return CollectFromReader(resp.Body, path, ch)
+	return CollectStatusFromReader(resp.Body, path, ch)
+}
+
+func CollectMetricsFromScript(socketPaths []string, scriptPaths []string) ([]*client_model.MetricFamily, error) {
+	var result []*client_model.MetricFamily
+
+	for _, socketPath := range socketPaths {
+
+		for _, scriptPath := range scriptPaths {
+			fcgi, err := fcgiclient.Dial("unix", socketPath)
+			if err != nil {
+				return result, err
+			}
+			defer fcgi.Close()
+
+			env := make(map[string]string)
+			env["DOCUMENT_ROOT"] = path.Dir(scriptPath)
+			env["SCRIPT_FILENAME"] = scriptPath
+			env["SCRIPT_NAME"] = path.Base(scriptPath)
+			env["REQUEST_METHOD"] = "GET"
+
+			resp, err := fcgi.Get(env)
+			if err != nil {
+				return result, err
+			}
+
+			var parser expfmt.TextParser
+			metricFamilies, err := parser.TextToMetricFamilies(resp.Body)
+			if err != nil {
+				return result, err
+			}
+
+			for _, metric := range metricFamilies {
+				result = append(result, metric)
+			}
+		}
+	}
+	return result, nil
 }
 
 type PhpfpmExporter struct {
@@ -175,8 +215,9 @@ func (e *PhpfpmExporter) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (e *PhpfpmExporter) Collect(ch chan<- prometheus.Metric) {
+
 	for _, socketPath := range e.socketPaths {
-		err := CollectFromSocket(socketPath, e.statusPath, ch)
+		err := CollectStatusFromSocket(socketPath, e.statusPath, ch)
 		if err == nil {
 			ch <- prometheus.MustNewConstMetric(
 				phpfpmUpDesc,
@@ -196,18 +237,27 @@ func (e *PhpfpmExporter) Collect(ch chan<- prometheus.Metric) {
 
 func main() {
 	var (
-		listenAddress = flag.String("web.listen-address", ":9253", "Address to listen on for web interface and telemetry.")
-		metricsPath   = flag.String("web.telemetry-path", "/metrics", "Path under which to expose metrics.")
-		socketPaths   = flag.String("phpfpm.socket-paths", "", "Paths of the PHP-FPM sockets.")
-		statusPath    = flag.String("phpfpm.status-path", "/status", "Path which has been configured in PHP-FPM to show status page.")
+		listenAddress = kingpin.Flag("web.listen-address", "Address to listen on for web interface and telemetry.").Default(":9253").String()
+		metricsPath = kingpin.Flag("web.telemetry-path", "Path under which to expose metrics.").Default("/metrics").String()
+		socketPaths = kingpin.Flag("phpfpm.socket-paths", "Paths of the PHP-FPM sockets.").Strings()
+		statusPath = kingpin.Flag("phpfpm.status-path", "Path which has been configured in PHP-FPM to show status page.").Default("/status").String()
+		scriptCollectorPaths = kingpin.Flag("phpfpm.script-collector-paths", "Paths of the PHP file whose output needs to be collected.").Strings()
 	)
-	flag.Parse()
 
-	exporter, err := NewPhpfpmExporter(strings.Split(*socketPaths, ","), *statusPath)
+	kingpin.Parse()
+
+	exporter, err := NewPhpfpmExporter(*socketPaths, *statusPath)
 	if err != nil {
 		panic(err)
 	}
 	prometheus.MustRegister(exporter)
+
+	if len(*scriptCollectorPaths) != 0 {
+		prometheus.DefaultGatherer = prometheus.Gatherers{
+				prometheus.DefaultGatherer,
+				prometheus.GathererFunc(func() ([]*client_model.MetricFamily, error) { return CollectMetricsFromScript(*socketPaths, *scriptCollectorPaths) }),
+		}
+	}
 
 	http.Handle(*metricsPath, prometheus.Handler())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
