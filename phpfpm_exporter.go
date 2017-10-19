@@ -24,10 +24,9 @@ import (
 	"strconv"
 	"time"
 
-	"gopkg.in/alecthomas/kingpin.v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/tomasen/fcgi_client"
-	// "github.com/prometheus/common/expfmt"
+	"gopkg.in/alecthomas/kingpin.v2"
 	client_model "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
 )
@@ -237,10 +236,10 @@ func (e *PhpfpmExporter) Collect(ch chan<- prometheus.Metric) {
 
 func main() {
 	var (
-		listenAddress = kingpin.Flag("web.listen-address", "Address to listen on for web interface and telemetry.").Default(":9253").String()
-		metricsPath = kingpin.Flag("web.telemetry-path", "Path under which to expose metrics.").Default("/metrics").String()
-		socketPaths = kingpin.Flag("phpfpm.socket-paths", "Paths of the PHP-FPM sockets.").Strings()
-		statusPath = kingpin.Flag("phpfpm.status-path", "Path which has been configured in PHP-FPM to show status page.").Default("/status").String()
+		listenAddress        = kingpin.Flag("web.listen-address", "Address to listen on for web interface and telemetry.").Default(":9253").String()
+		metricsPath          = kingpin.Flag("web.telemetry-path", "Path under which to expose metrics.").Default("/metrics").String()
+		socketPaths          = kingpin.Flag("phpfpm.socket-paths", "Paths of the PHP-FPM sockets.").Strings()
+		statusPath           = kingpin.Flag("phpfpm.status-path", "Path which has been configured in PHP-FPM to show status page.").Default("/status").String()
 		scriptCollectorPaths = kingpin.Flag("phpfpm.script-collector-paths", "Paths of the PHP file whose output needs to be collected.").Strings()
 	)
 
@@ -254,8 +253,10 @@ func main() {
 
 	if len(*scriptCollectorPaths) != 0 {
 		prometheus.DefaultGatherer = prometheus.Gatherers{
-				prometheus.DefaultGatherer,
-				prometheus.GathererFunc(func() ([]*client_model.MetricFamily, error) { return CollectMetricsFromScript(*socketPaths, *scriptCollectorPaths) }),
+			prometheus.DefaultGatherer,
+			prometheus.GathererFunc(func() ([]*client_model.MetricFamily, error) {
+				return CollectMetricsFromScript(*socketPaths, *scriptCollectorPaths)
+			}),
 		}
 	}
 
