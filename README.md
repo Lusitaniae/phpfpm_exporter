@@ -10,7 +10,7 @@ metric as a label.
 
 This exporter also provides a way for embedding the output of arbitrary
 PHP scripts into its metrics page, analogous to the node exporter's
-`textfile` collector. Scripts that are specified with the:x
+`textfile` collector. Scripts that are specified with the
 `--phpfpm.script-collector-paths` flag will be run through PHP-FPM. Any
 metrics printed by the PHP script will be merged into the metrics
 provided by this exported. An example use case includes printing metrics
