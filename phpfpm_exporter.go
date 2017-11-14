@@ -32,54 +32,57 @@ import (
 )
 
 var (
+	phpfpmSocketPathLabel = "socket_path"
+	phpfpmScriptPathLabel = "script_path"
+
 	phpfpmUpDesc = prometheus.NewDesc(
 		prometheus.BuildFQName("php", "fpm", "up"),
 		"Whether scraping PHP-FPM's metrics was successful.",
-		[]string{"socket_path"}, nil)
+		[]string{phpfpmSocketPathLabel}, nil)
 
 	phpfpmAcceptedConnections = prometheus.NewDesc(
 		prometheus.BuildFQName("php", "fpm", "accepted_connections_total"),
 		"Number of request accepted by the pool.",
-		[]string{"socket_path"}, nil)
+		[]string{phpfpmSocketPathLabel}, nil)
 
 	phpfpmStartTime = prometheus.NewDesc(
 		prometheus.BuildFQName("php", "fpm", "start_time_seconds"),
 		"Unix time when FPM has started or reloaded.",
-		[]string{"socket_path"}, nil)
+		[]string{phpfpmSocketPathLabel}, nil)
 
 	phpfpmGauges = map[string]*prometheus.Desc{
 		"listen queue": prometheus.NewDesc(
 			prometheus.BuildFQName("php", "fpm", "listen_queue"),
 			"Number of request in the queue of pending connections.",
-			[]string{"socket_path"}, nil),
+			[]string{phpfpmSocketPathLabel}, nil),
 		"max listen queue": prometheus.NewDesc(
 			prometheus.BuildFQName("php", "fpm", "max_listen_queue"),
 			"Maximum number of requests in the queue of pending connections since FPM has started.",
-			[]string{"socket_path"}, nil),
+			[]string{phpfpmSocketPathLabel}, nil),
 		"listen queue len": prometheus.NewDesc(
 			prometheus.BuildFQName("php", "fpm", "listen_queue_length"),
 			"The size of the socket queue of pending connections.",
-			[]string{"socket_path"}, nil),
+			[]string{phpfpmSocketPathLabel}, nil),
 		"idle processes": prometheus.NewDesc(
 			prometheus.BuildFQName("php", "fpm", "idle_processes"),
 			"Number of idle processes.",
-			[]string{"socket_path"}, nil),
+			[]string{phpfpmSocketPathLabel}, nil),
 		"active processes": prometheus.NewDesc(
 			prometheus.BuildFQName("php", "fpm", "active_processes"),
 			"Number of active processes.",
-			[]string{"socket_path"}, nil),
+			[]string{phpfpmSocketPathLabel}, nil),
 		"max active processes": prometheus.NewDesc(
 			prometheus.BuildFQName("php", "fpm", "max_active_processes"),
 			"Maximum number of active processes since FPM has started.",
-			[]string{"socket_path"}, nil),
+			[]string{phpfpmSocketPathLabel}, nil),
 		"max children reached": prometheus.NewDesc(
 			prometheus.BuildFQName("php", "fpm", "max_children_reached"),
 			"Number of times, the process limit has been reached.",
-			[]string{"socket_path"}, nil),
+			[]string{phpfpmSocketPathLabel}, nil),
 		"slow requests": prometheus.NewDesc(
 			prometheus.BuildFQName("php", "fpm", "slow_requests"),
 			"Enable php-fpm slow-log before you consider this. If this value is non-zero you may have slow php processes.",
-			[]string{"socket_path"}, nil),
+			[]string{phpfpmSocketPathLabel}, nil),
 	}
 )
 
@@ -184,8 +187,20 @@ func CollectMetricsFromScript(socketPaths []string, scriptPaths []string) ([]*cl
 				return result, err
 			}
 
-			for _, metric := range metricFamilies {
-				result = append(result, metric)
+			for _, metricFamily := range metricFamilies {
+				for _, metric := range metricFamily.Metric {
+					metric.Label = append(
+						metric.Label,
+						&client_model.LabelPair{
+							Name:  &phpfpmSocketPathLabel,
+							Value: &socketPath,
+						},
+						&client_model.LabelPair{
+							Name:  &phpfpmScriptPathLabel,
+							Value: &scriptPath,
+						})
+				}
+				result = append(result, metricFamily)
 			}
 		}
 	}
