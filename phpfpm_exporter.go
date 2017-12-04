@@ -189,15 +189,17 @@ func CollectMetricsFromScript(socketPaths []string, scriptPaths []string) ([]*cl
 
 			for _, metricFamily := range metricFamilies {
 				for _, metric := range metricFamily.Metric {
+					socketPathCopy := socketPath
+					scriptPathCopy := scriptPath
 					metric.Label = append(
 						metric.Label,
 						&client_model.LabelPair{
 							Name:  &phpfpmSocketPathLabel,
-							Value: &socketPath,
+							Value: &socketPathCopy,
 						},
 						&client_model.LabelPair{
 							Name:  &phpfpmScriptPathLabel,
-							Value: &scriptPath,
+							Value: &scriptPathCopy,
 						})
 				}
 				result = append(result, metricFamily)
