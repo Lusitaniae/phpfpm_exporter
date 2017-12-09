@@ -1,5 +1,8 @@
 # PHP-FPM Exporter for Prometheus [![Build Status][buildstatus]][circleci]
 
+[![Docker Repository on Quay](https://quay.io/repository/Lusitaniae/phpfpm-exporter/status)][quay]
+[![Docker Pulls](https://img.shields.io/docker/pulls/lusotycoon/phpfpm-exporter.svg?maxAge=604800)][hub]
+
 This repository provides code for a Prometheus metrics exporter
 for [the PHP-FPM status page](http://nl1.php.net/manual/en/install.fpm.php).
 This exporter provides several metrics listed below. It extracts these
@@ -40,3 +43,5 @@ php_fpm_up{socket_path="/var/run/php5-fpm_example.sock"} 1
 
 [buildstatus]: https://circleci.com/gh/Lusitaniae/phpfpm_exporter/tree/master.svg?style=shield
 [circleci]: https://circleci.com/gh/Lusitaniae/phpfpm_exporter
+[quay]: https://quay.io/repository/Lusitaniae/phpfpm-exporter
+[hub]: https://hub.docker.com/r/lusotycoon/phpfpm-exporter/
