@@ -1,4 +1,4 @@
-# Prometheus phpfpm_exporter
+# PHP-FPM Exporter for Prometheus [![Build Status][buildstatus]][circleci]
 
 This repository provides code for a Prometheus metrics exporter
 for [the PHP-FPM status page](http://nl1.php.net/manual/en/install.fpm.php).
@@ -37,3 +37,6 @@ php_fpm_slow_requests{socket_path="/var/run/php5-fpm_example.sock"} 0
 php_fpm_start_time_seconds{socket_path="/var/run/php5-fpm_example.sock"} 1.49277445e+09
 php_fpm_up{socket_path="/var/run/php5-fpm_example.sock"} 1
 ```
+
+[buildstatus]: https://circleci.com/gh/Lusitaniae/phpfpm_exporter/tree/master.svg?style=shield
+[circleci]: https://circleci.com/gh/Lusitaniae/phpfpm_exporter
