@@ -16,10 +16,10 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"os"
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"path"
 	"regexp"
 	"strconv"
@@ -259,7 +259,7 @@ func main() {
 		metricsPath          = kingpin.Flag("web.telemetry-path", "Path under which to expose metrics.").Default("/metrics").String()
 		socketPaths          = kingpin.Flag("phpfpm.socket-paths", "Paths of the PHP-FPM sockets.").Strings()
 		statusPath           = kingpin.Flag("phpfpm.status-path", "Path which has been configured in PHP-FPM to show status page.").Default("/status").String()
-		showVersion           = kingpin.Flag("version", "Print version information.").Bool()
+		showVersion          = kingpin.Flag("version", "Print version information.").Bool()
 		scriptCollectorPaths = kingpin.Flag("phpfpm.script-collector-paths", "Paths of the PHP file whose output needs to be collected.").Strings()
 	)
 
