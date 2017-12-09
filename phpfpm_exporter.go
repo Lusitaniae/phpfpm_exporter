@@ -16,6 +16,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"os"
 	"io"
 	"log"
 	"net/http"
@@ -27,6 +28,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	client_model "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
+	"github.com/prometheus/common/version"
 	"github.com/tomasen/fcgi_client"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
@@ -257,10 +259,16 @@ func main() {
 		metricsPath          = kingpin.Flag("web.telemetry-path", "Path under which to expose metrics.").Default("/metrics").String()
 		socketPaths          = kingpin.Flag("phpfpm.socket-paths", "Paths of the PHP-FPM sockets.").Strings()
 		statusPath           = kingpin.Flag("phpfpm.status-path", "Path which has been configured in PHP-FPM to show status page.").Default("/status").String()
+		showVersion           = kingpin.Flag("version", "Print version information.").Bool()
 		scriptCollectorPaths = kingpin.Flag("phpfpm.script-collector-paths", "Paths of the PHP file whose output needs to be collected.").Strings()
 	)
 
 	kingpin.Parse()
+
+	if *showVersion {
+		fmt.Println(version.Print("phpfpm_exporter"))
+		os.Exit(0)
+	}
 
 	exporter, err := NewPhpfpmExporter(*socketPaths, *statusPath)
 	if err != nil {
@@ -276,6 +284,10 @@ func main() {
 			}),
 		}
 	}
+
+	log.Println("Starting phpfpm_exporter", version.Info())
+	log.Println("Build context", version.BuildContext())
+	log.Printf("Starting Server: %s", *listenAddress)
 
 	http.Handle(*metricsPath, prometheus.Handler())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
