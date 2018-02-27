@@ -42,6 +42,7 @@ Help on flags
           --phpfpm.script-collector-paths=PHPFPM.SCRIPT-COLLECTOR-PATHS ...
                      Paths of the PHP file whose output needs to be collected.
 
+When using `--phpfpm.socket-directories`  make sure to use dedicated directories for PHP-FPM sockets to avoid timeouts.
 
 # Metrics emitted by PHP-FPM:
 
