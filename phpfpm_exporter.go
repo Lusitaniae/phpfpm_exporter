@@ -271,10 +271,7 @@ func main() {
 	var sockets []string
 	for _, socketDirectory := range *socketDirectories {
 		filepath.Walk(socketDirectory, func(path string, info os.FileInfo, err error) error {
-			if info.IsDir() {
-				return nil
-			}
-			if filepath.Ext(path) == ".sock" {
+			if err == nil && info.Mode()&os.ModeSocket != 0 {
 				sockets = append(sockets, path)
 			}
 			return nil
