@@ -31,6 +31,7 @@ import (
 	"github.com/prometheus/common/version"
 	"github.com/tomasen/fcgi_client"
 	"gopkg.in/alecthomas/kingpin.v2"
+	"path/filepath"
 )
 
 var (
@@ -258,6 +259,7 @@ func main() {
 		listenAddress        = kingpin.Flag("web.listen-address", "Address to listen on for web interface and telemetry.").Default(":9253").String()
 		metricsPath          = kingpin.Flag("web.telemetry-path", "Path under which to expose metrics.").Default("/metrics").String()
 		socketPaths          = kingpin.Flag("phpfpm.socket-paths", "Paths of the PHP-FPM sockets.").Strings()
+		socketDirectories    = kingpin.Flag("phpfpm.socket-directories", "Path(s) of the directory where PHP-FPM sockets are located.").Strings()
 		statusPath           = kingpin.Flag("phpfpm.status-path", "Path which has been configured in PHP-FPM to show status page.").Default("/status").String()
 		scriptCollectorPaths = kingpin.Flag("phpfpm.script-collector-paths", "Paths of the PHP file whose output needs to be collected.").Strings()
 		showVersion          = kingpin.Flag("version", "Print version information.").Bool()
@@ -266,12 +268,26 @@ func main() {
 	kingpin.CommandLine.HelpFlag.Short('h')
 	kingpin.Parse()
 
+	var sockets []string
+	for _, socketDirectory := range *socketDirectories {
+		filepath.Walk(socketDirectory, func(path string, info os.FileInfo, err error) error {
+			if err == nil && info.Mode()&os.ModeSocket != 0 {
+				sockets = append(sockets, path)
+			}
+			return nil
+		})
+	}
+
+	for _, socket := range *socketPaths {
+		sockets = append(sockets, socket)
+	}
+
 	if *showVersion {
 		fmt.Println(version.Print("phpfpm_exporter"))
 		os.Exit(0)
 	}
 
-	exporter, err := NewPhpfpmExporter(*socketPaths, *statusPath)
+	exporter, err := NewPhpfpmExporter(sockets, *statusPath)
 	if err != nil {
 		panic(err)
 	}
@@ -281,7 +297,7 @@ func main() {
 		prometheus.DefaultGatherer = prometheus.Gatherers{
 			prometheus.DefaultGatherer,
 			prometheus.GathererFunc(func() ([]*client_model.MetricFamily, error) {
-				return CollectMetricsFromScript(*socketPaths, *scriptCollectorPaths)
+				return CollectMetricsFromScript(sockets, *scriptCollectorPaths)
 			}),
 		}
 	}

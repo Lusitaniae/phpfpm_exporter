@@ -28,16 +28,18 @@ Help on flags
 
     Flags:
       -h, --help     Show context-sensitive help (also try --help-long and --help-man).
-          --web.listen-address=":9253"  
+          --web.listen-address=":9253"
                      Address to listen on for web interface and telemetry.
-          --web.telemetry-path="/metrics"  
+          --web.telemetry-path="/metrics"
                      Path under which to expose metrics.
-          --phpfpm.socket-paths=PHPFPM.SOCKET-PATHS ...  
-                     Paths of the PHP-FPM sockets.
-          --phpfpm.status-path="/status"  
+          --phpfpm.socket-paths=PHPFPM.SOCKET-PATHS ...
+                     Path(s) of the PHP-FPM sockets.
+          --phpfpm.socket-directories=PHPFPM.SOCKET-DIRECTORIES ...
+                     Path(s) of the directory where PHP-FPM sockets are located.
+          --phpfpm.status-path="/status"
                      Path which has been configured in PHP-FPM to show status page.
           --version  Print version information.
-          --phpfpm.script-collector-paths=PHPFPM.SCRIPT-COLLECTOR-PATHS ...  
+          --phpfpm.script-collector-paths=PHPFPM.SCRIPT-COLLECTOR-PATHS ...
                      Paths of the PHP file whose output needs to be collected.
 
 
