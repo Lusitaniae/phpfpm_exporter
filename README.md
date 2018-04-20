@@ -1,4 +1,3 @@
-
 # PHP-FPM Exporter for Prometheus [![Build Status][buildstatus]][circleci]
 
 [![Docker Repository on Quay](https://quay.io/repository/Lusitaniae/phpfpm-exporter/status)][quay]
