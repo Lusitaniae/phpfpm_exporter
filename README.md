@@ -61,7 +61,7 @@ php_fpm_up{socket_path="/var/run/phpfpm.sock"} 1
 ```
 
 # Grafana Dashboards
-There's two grafana dashboards available for this exporter:
+There's multiple grafana dashboards available for this exporter, find them at the urls below or in ```contrib/```.
 
 [Basic:](https://grafana.com/dashboards/5579) for analyzing a single fpm pool in detail.
 
