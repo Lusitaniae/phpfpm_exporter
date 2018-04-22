@@ -60,6 +60,19 @@ php_fpm_start_time_seconds{socket_path="/var/run/phpfpm.sock"} 1.49277445e+09
 php_fpm_up{socket_path="/var/run/phpfpm.sock"} 1
 ```
 
+# Grafana Dashboards
+There's multiple grafana dashboards available for this exporter, find them at the urls below or in ```contrib/```.
+
+[Basic:](https://grafana.com/dashboards/5579) for analyzing a single fpm pool in detail.
+
+[Multi Pool:](https://grafana.com/dashboards/5714) for analyzing a cluster of fpm pools.
+
+Basic:
+![basic](https://grafana.com/api/dashboards/5579/images/3536/image)
+
+Multi Pool:
+![multi pool](https://grafana.com/api/dashboards/5714/images/3608/image)
+
 [buildstatus]: https://circleci.com/gh/Lusitaniae/phpfpm_exporter/tree/master.svg?style=shield
 [circleci]: https://circleci.com/gh/Lusitaniae/phpfpm_exporter
 [quay]: https://quay.io/repository/Lusitaniae/phpfpm-exporter
