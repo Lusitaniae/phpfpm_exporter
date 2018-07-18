@@ -1,0 +1,15 @@
+[Unit]
+Description = Prometheus platform: phpfpm_exporter
+After = network.target
+
+[Service]
+Type = simple
+User = apache
+Group = apache
+WorkingDirectory = /opt/phpfpm_exporter
+SyslogIdentifier = phpfpm_exporter
+Restart = on-failure
+ExecStart = /opt/phpfpm_exporter/phpfpm_exporter --web.listen-address=X.X.X.X:9253 --phpfpm.socket-directories=/run/php-fpm/
+
+[Install]
+WantedBy = multi-user.target
