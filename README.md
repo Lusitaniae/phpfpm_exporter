@@ -59,9 +59,9 @@ php_fpm_slow_requests{socket_path="/var/run/phpfpm.sock"} 0
 php_fpm_start_time_seconds{socket_path="/var/run/phpfpm.sock"} 1.49277445e+09
 php_fpm_up{socket_path="/var/run/phpfpm.sock"} 1
 ```
-# Requirement
+# Requirements
 
-You must have the fpm status page available locally. So in all your fpm pool that you want to monitor, you need 'pm.status_path = /status' in the pool configuration. In the socket version nothing more is required.
+The FPM status page must be enabled in every pool you'd like to monitor by defining `pm.status_path = /status`.
 
 # Grafana Dashboards
 There's multiple grafana dashboards available for this exporter, find them at the urls below or in ```contrib/```.
