@@ -1,4 +1,5 @@
 <?php
+
 //
 // Reports status, statistics and configuration directives
 // from OPcache in Prometheus format.
@@ -19,23 +20,26 @@
 header('Content-Type: text/plain; version=0.0.5');
 
 // Iterate and print in the Prometheus format
-function dump_as_prometheus_metric($root, $prefix) {
-  if (is_numeric($root)) {
-    print("$prefix $root\n");
-  } else if (is_bool($root)) {
-    if ($root)
-      print("$prefix 1\n");
-    else
-      print("$prefix 0\n");
-  } else if (is_string($root)) {
-    // Skip, as Prometheus doesn't support string values.
-  } else if (is_array($root)) {
-    foreach ($root as $key => $value)
-      dump_as_prometheus_metric($value, $prefix . '_' . str_replace('.', '_', $key));
-  } else {
-    var_dump($root);
-    die('Encountered unsupported value type');
-  }
+function dump_as_prometheus_metric($root, $prefix)
+{
+    if (is_numeric($root)) {
+        echo "$prefix $root\n";
+    } elseif (is_bool($root)) {
+        if ($root) {
+            print "$prefix 1\n";
+        } else {
+            print "$prefix 0\n";
+        }
+    } elseif (is_string($root)) {
+        // Skip, as Prometheus doesn't support string values.
+    } elseif (is_array($root)) {
+        foreach ($root as $key => $value) {
+            dump_as_prometheus_metric($value, $prefix.'_'.str_replace('.', '_', $key));
+        }
+    } else {
+        var_dump($root);
+        die('Encountered unsupported value type');
+    }
 }
 
 // Report status & statistics
