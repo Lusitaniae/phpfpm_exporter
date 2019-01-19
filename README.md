@@ -35,7 +35,7 @@ Bear in mind these metrics are global, all FPM pools share the same cache.
 
 Run with Docker
 ```
-SOCK="/run/php/php7.2-fpm.sock" \
+SOCK="/run/php/php7.2-fpm.sock"; \
 docker run -d -p 9253:9253 -v $SOCK:$SOCK  \
 lusotycoon/phpfpm-exporter \
 --phpfpm.socket-paths=$SOCK
