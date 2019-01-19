@@ -17,10 +17,30 @@ for PHP's `opcache`.
 
 # Usage:
 
-Running exporter
+Run the exporter
 ```
-./phpfpm_exporter --phpfpm.socket-paths /var/run/phpfpm.sock --phpfpm.script-collector-paths /path/script.php
+./phpfpm_exporter --phpfpm.socket-paths /var/run/phpfpm.sock
 ```
+
+Include additional metrics from a PHP script
+
+E.g. export OPcache metrics (using `contrib/php_opcache_exporter.php`)
+
+Bear in mind these metrics are global, all FPM pools share the same cache.
+```
+./phpfpm_exporter --phpfpm.socket-paths /var/run/phpfpm.sock \
+--phpfpm.script-collector-paths /usr/local/bin/php_exporter/phpfpm_opcache_exporter.php
+
+```
+
+Run with Docker
+```
+SOCK="/run/php/php7.2-fpm.sock" \
+docker run -d -p 9253:9253 -v $SOCK:$SOCK  \
+lusotycoon/phpfpm-exporter \
+--phpfpm.socket-paths=$SOCK
+```
+
 Help on flags
 
     ./phpfpm_exporter -h

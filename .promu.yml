@@ -11,3 +11,4 @@ build:
 tarball:
     files:
         - LICENSE
+        - contrib/php_opcache_exporter.php
