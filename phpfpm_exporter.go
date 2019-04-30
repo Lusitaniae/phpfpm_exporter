@@ -25,13 +25,14 @@ import (
 	"strconv"
 	"time"
 
+	"path/filepath"
+
 	"github.com/prometheus/client_golang/prometheus"
 	client_model "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
 	"github.com/prometheus/common/version"
 	"github.com/tomasen/fcgi_client"
 	"gopkg.in/alecthomas/kingpin.v2"
-	"path/filepath"
 )
 
 var (
@@ -73,6 +74,10 @@ var (
 		"active processes": prometheus.NewDesc(
 			prometheus.BuildFQName("php", "fpm", "active_processes"),
 			"Number of active processes.",
+			[]string{phpfpmSocketPathLabel}, nil),
+		"total processes": prometheus.NewDesc(
+			prometheus.BuildFQName("php", "fpm", "total_processes"),
+			"Number of total processes.",
 			[]string{phpfpmSocketPathLabel}, nil),
 		"max active processes": prometheus.NewDesc(
 			prometheus.BuildFQName("php", "fpm", "max_active_processes"),
