@@ -77,6 +77,7 @@ php_fpm_max_children_reached{socket_path="/var/run/phpfpm.sock"} 3
 php_fpm_max_listen_queue{socket_path="/var/run/phpfpm.sock"} 0
 php_fpm_slow_requests{socket_path="/var/run/phpfpm.sock"} 0
 php_fpm_start_time_seconds{socket_path="/var/run/phpfpm.sock"} 1.49277445e+09
+php_fpm_total_processes{socket_path="/var/run/phpfpm.sock"} 3
 php_fpm_up{socket_path="/var/run/phpfpm.sock"} 1
 ```
 # Requirements
