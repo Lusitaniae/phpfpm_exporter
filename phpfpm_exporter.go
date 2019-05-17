@@ -28,6 +28,7 @@ import (
 	"path/filepath"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	client_model "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
 	"github.com/prometheus/common/version"
@@ -298,8 +299,9 @@ func main() {
 	}
 	prometheus.MustRegister(exporter)
 
+	gatherer := prometheus.DefaultGatherer
 	if len(*scriptCollectorPaths) != 0 {
-		prometheus.DefaultGatherer = prometheus.Gatherers{
+		gatherer = prometheus.Gatherers{
 			prometheus.DefaultGatherer,
 			prometheus.GathererFunc(func() ([]*client_model.MetricFamily, error) {
 				return CollectMetricsFromScript(sockets, *scriptCollectorPaths)
@@ -311,7 +313,7 @@ func main() {
 	log.Println("Build context", version.BuildContext())
 	log.Printf("Starting Server: %s", *listenAddress)
 
-	http.Handle(*metricsPath, prometheus.Handler())
+	http.Handle(*metricsPath, promhttp.HandlerFor(gatherer, promhttp.HandlerOpts{ErrorHandling: promhttp.ContinueOnError}))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`
 			<html>
