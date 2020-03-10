@@ -266,6 +266,7 @@ func main() {
 		metricsPath          = kingpin.Flag("web.telemetry-path", "Path under which to expose metrics.").Default("/metrics").String()
 		socketPaths          = kingpin.Flag("phpfpm.socket-paths", "Paths of the PHP-FPM sockets.").Strings()
 		socketDirectories    = kingpin.Flag("phpfpm.socket-directories", "Path(s) of the directory where PHP-FPM sockets are located.").Strings()
+		socketRegexp         = kingpin.Flag("phpfpm.socket-regexp", "Regexpression which must match for sockets found by socket-directories").Default(".*").String()
 		statusPath           = kingpin.Flag("phpfpm.status-path", "Path which has been configured in PHP-FPM to show status page.").Default("/status").String()
 		scriptCollectorPaths = kingpin.Flag("phpfpm.script-collector-paths", "Paths of the PHP file whose output needs to be collected.").Strings()
 		showVersion          = kingpin.Flag("version", "Print version information.").Bool()
@@ -278,7 +279,12 @@ func main() {
 	for _, socketDirectory := range *socketDirectories {
 		filepath.Walk(socketDirectory, func(path string, info os.FileInfo, err error) error {
 			if err == nil && info.Mode()&os.ModeSocket != 0 {
-				sockets = append(sockets, path)
+			  var regex = regexp.MustCompile(*socketRegexp)
+			  if(regex.MatchString(path)) {
+			    sockets = append(sockets, path)
+			  } else {
+			    log.Printf("Socket \"%s\" does not match Regex", path)
+			  }
 			}
 			return nil
 		})
