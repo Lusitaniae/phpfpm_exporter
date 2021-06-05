@@ -13,6 +13,7 @@ jobs:
       - run: make
       - prometheus/store_artifact:
           file: phpfpm_exporter
+          
 workflows:
   version: 2
   phpfpm_exporter:
@@ -28,6 +29,8 @@ workflows:
               only: /.*/
       - prometheus/publish_master:
           context: org-global
+          docker_hub_organization: lusotycoon
+          quay_io_organization: lusitaniae
           requires:
             - test
             - build
@@ -36,6 +39,8 @@ workflows:
               only: master
       - prometheus/publish_release:
           context: org-global
+          docker_hub_organization: lusotycoon
+          quay_io_organization: lusitaniae
           requires:
             - test
             - build
