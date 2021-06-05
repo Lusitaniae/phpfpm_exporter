@@ -1,6 +1,12 @@
-FROM quay.io/prometheus/busybox:latest
+ARG ARCH="amd64"
+ARG OS="linux"
+FROM quay.io/prometheus/busybox-${OS}-${ARCH}:latest
+LABEL maintainer="https://github.com/Lusitaniae"
 
-COPY phpfpm_exporter /bin/phpfpm_exporter
+ARG ARCH="amd64"
+ARG OS="linux"
+COPY .build/${OS}-${ARCH}/phpfpm_exporter /bin/phpfpm_exporter
 
-ENTRYPOINT ["/bin/phpfpm_exporter"]
-EXPOSE     9253
+EXPOSE      9117
+USER        nobody
+ENTRYPOINT  [ "/bin/phpfpm_exporter" ]
