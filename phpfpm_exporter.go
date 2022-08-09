@@ -165,17 +165,14 @@ func CollectStatusFromSocket(path *SocketPath, statusPath string, ch chan<- prom
 		return err
 	}
 
-	return CollectStatusFromReader(resp.Body, path.Network+":"+path.Address, ch)
+	return CollectStatusFromReader(resp.Body, path.FormatStr(), ch)
 }
 
 func CollectMetricsFromScript(socketPaths []*SocketPath, scriptPaths []string) ([]*client_model.MetricFamily, error) {
 	var result []*client_model.MetricFamily
 
 	for _, socketPath := range socketPaths {
-		log.Println(socketPath)
 		for _, scriptPath := range scriptPaths {
-			//fcgi, err := fcgiclient.Dial("unix", socketPath)
-			log.Println(socketPath)
 			fcgi, err := fcgiclient.Dial(socketPath.Network, socketPath.Address)
 			if err != nil {
 				return result, err
@@ -201,7 +198,7 @@ func CollectMetricsFromScript(socketPaths []*SocketPath, scriptPaths []string) (
 
 			for _, metricFamily := range metricFamilies {
 				for _, metric := range metricFamily.Metric {
-					socketPathCopy := socketPath.Network + ":" + socketPath.Address
+					socketPathCopy := socketPath.FormatStr()
 					scriptPathCopy := scriptPath
 					metric.Label = append(
 						metric.Label,
@@ -251,14 +248,14 @@ func (e *PhpfpmExporter) Collect(ch chan<- prometheus.Metric) {
 				phpfpmUpDesc,
 				prometheus.GaugeValue,
 				1.0,
-				socketPath.Network+":"+socketPath.Network)
+				socketPath.FormatStr())
 		} else {
 			log.Printf("Failed to scrape socket: %s", err)
 			ch <- prometheus.MustNewConstMetric(
 				phpfpmUpDesc,
 				prometheus.GaugeValue,
 				0.0,
-				socketPath.Network+":"+socketPath.Network)
+				socketPath.FormatStr())
 		}
 	}
 }
@@ -266,6 +263,10 @@ func (e *PhpfpmExporter) Collect(ch chan<- prometheus.Metric) {
 type SocketPath struct {
 	Network string
 	Address string
+}
+
+func (s *SocketPath) FormatStr() string {
+	return s.Network + "://" + s.Address
 }
 
 func NewSocketPath(socketPath string) *SocketPath {
