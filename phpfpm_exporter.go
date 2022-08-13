@@ -23,6 +23,7 @@ import (
 	"path"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"path/filepath"
@@ -146,14 +147,14 @@ func CollectStatusFromReader(reader io.Reader, socketPath string, ch chan<- prom
 	return nil
 }
 
-func CollectStatusFromSocket(path string, statusPath string, ch chan<- prometheus.Metric) error {
+func CollectStatusFromSocket(path *SocketPath, statusPath string, ch chan<- prometheus.Metric) error {
 
 	env := make(map[string]string)
 	env["SCRIPT_FILENAME"] = statusPath
 	env["SCRIPT_NAME"] = statusPath
 	env["REQUEST_METHOD"] = "GET"
 
-	fcgi, err := fcgiclient.Dial("unix", path)
+	fcgi, err := fcgiclient.Dial(path.Network, path.Address)
 	if err != nil {
 		return err
 	}
@@ -164,16 +165,15 @@ func CollectStatusFromSocket(path string, statusPath string, ch chan<- prometheu
 		return err
 	}
 
-	return CollectStatusFromReader(resp.Body, path, ch)
+	return CollectStatusFromReader(resp.Body, path.FormatStr(), ch)
 }
 
-func CollectMetricsFromScript(socketPaths []string, scriptPaths []string) ([]*client_model.MetricFamily, error) {
+func CollectMetricsFromScript(socketPaths []*SocketPath, scriptPaths []string) ([]*client_model.MetricFamily, error) {
 	var result []*client_model.MetricFamily
 
 	for _, socketPath := range socketPaths {
-
 		for _, scriptPath := range scriptPaths {
-			fcgi, err := fcgiclient.Dial("unix", socketPath)
+			fcgi, err := fcgiclient.Dial(socketPath.Network, socketPath.Address)
 			if err != nil {
 				return result, err
 			}
@@ -198,7 +198,7 @@ func CollectMetricsFromScript(socketPaths []string, scriptPaths []string) ([]*cl
 
 			for _, metricFamily := range metricFamilies {
 				for _, metric := range metricFamily.Metric {
-					socketPathCopy := socketPath
+					socketPathCopy := socketPath.FormatStr()
 					scriptPathCopy := scriptPath
 					metric.Label = append(
 						metric.Label,
@@ -219,11 +219,11 @@ func CollectMetricsFromScript(socketPaths []string, scriptPaths []string) ([]*cl
 }
 
 type PhpfpmExporter struct {
-	socketPaths []string
+	socketPaths []*SocketPath
 	statusPath  string
 }
 
-func NewPhpfpmExporter(socketPaths []string, statusPath string) (*PhpfpmExporter, error) {
+func NewPhpfpmExporter(socketPaths []*SocketPath, statusPath string) (*PhpfpmExporter, error) {
 	return &PhpfpmExporter{
 		socketPaths: socketPaths,
 		statusPath:  statusPath,
@@ -248,16 +248,36 @@ func (e *PhpfpmExporter) Collect(ch chan<- prometheus.Metric) {
 				phpfpmUpDesc,
 				prometheus.GaugeValue,
 				1.0,
-				socketPath)
+				socketPath.FormatStr())
 		} else {
 			log.Printf("Failed to scrape socket: %s", err)
 			ch <- prometheus.MustNewConstMetric(
 				phpfpmUpDesc,
 				prometheus.GaugeValue,
 				0.0,
-				socketPath)
+				socketPath.FormatStr())
 		}
 	}
+}
+
+type SocketPath struct {
+	Network string
+	Address string
+}
+
+func (s *SocketPath) FormatStr() string {
+	return s.Network + "://" + s.Address
+}
+
+func NewSocketPath(socketPath string) *SocketPath {
+
+	i := strings.Index(socketPath, "://")
+	if i < 0 {
+		return &SocketPath{"unix", socketPath}
+	}
+	network := socketPath[:i]
+	address := socketPath[i+3:]
+	return &SocketPath{network, address}
 }
 
 func main() {
@@ -274,18 +294,18 @@ func main() {
 	kingpin.CommandLine.HelpFlag.Short('h')
 	kingpin.Parse()
 
-	var sockets []string
+	var sockets []*SocketPath
 	for _, socketDirectory := range *socketDirectories {
-		filepath.Walk(socketDirectory, func(path string, info os.FileInfo, err error) error {
+		_ = filepath.Walk(socketDirectory, func(path string, info os.FileInfo, err error) error {
 			if err == nil && info.Mode()&os.ModeSocket != 0 {
-				sockets = append(sockets, path)
+				sockets = append(sockets, NewSocketPath(path))
 			}
 			return nil
 		})
 	}
 
 	for _, socket := range *socketPaths {
-		sockets = append(sockets, socket)
+		sockets = append(sockets, NewSocketPath(socket))
 	}
 
 	if *showVersion {
@@ -315,7 +335,7 @@ func main() {
 
 	http.Handle(*metricsPath, promhttp.HandlerFor(gatherer, promhttp.HandlerOpts{ErrorHandling: promhttp.ContinueOnError}))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`
+		_, _ = w.Write([]byte(`
 			<html>
 			<head><title>PHP-FPM Exporter</title></head>
 			<body>
