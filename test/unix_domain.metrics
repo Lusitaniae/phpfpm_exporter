@@ -1,0 +1,33 @@
+# HELP php_fpm_accepted_connections_total Number of request accepted by the pool.
+# TYPE php_fpm_accepted_connections_total counter
+php_fpm_accepted_connections_total{socket_path="/tmp/phpfpmtest.sock"} 3
+# HELP php_fpm_active_processes Number of active processes.
+# TYPE php_fpm_active_processes gauge
+php_fpm_active_processes{socket_path="/tmp/phpfpmtest.sock"} 1
+# HELP php_fpm_idle_processes Number of idle processes.
+# TYPE php_fpm_idle_processes gauge
+php_fpm_idle_processes{socket_path="/tmp/phpfpmtest.sock"} 1
+# HELP php_fpm_listen_queue Number of request in the queue of pending connections.
+# TYPE php_fpm_listen_queue gauge
+php_fpm_listen_queue{socket_path="/tmp/phpfpmtest.sock"} 0
+# HELP php_fpm_listen_queue_length The size of the socket queue of pending connections.
+# TYPE php_fpm_listen_queue_length gauge
+php_fpm_listen_queue_length{socket_path="/tmp/phpfpmtest.sock"} 0
+# HELP php_fpm_max_active_processes Maximum number of active processes since FPM has started.
+# TYPE php_fpm_max_active_processes gauge
+php_fpm_max_active_processes{socket_path="/tmp/phpfpmtest.sock"} 1
+# HELP php_fpm_max_children_reached Number of times, the process limit has been reached.
+# TYPE php_fpm_max_children_reached gauge
+php_fpm_max_children_reached{socket_path="/tmp/phpfpmtest.sock"} 0
+# HELP php_fpm_max_listen_queue Maximum number of requests in the queue of pending connections since FPM has started.
+# TYPE php_fpm_max_listen_queue gauge
+php_fpm_max_listen_queue{socket_path="/tmp/phpfpmtest.sock"} 0
+# HELP php_fpm_slow_requests Enable php-fpm slow-log before you consider this. If this value is non-zero you may have slow php processes.
+# TYPE php_fpm_slow_requests gauge
+php_fpm_slow_requests{socket_path="/tmp/phpfpmtest.sock"} 0
+# HELP php_fpm_start_time_seconds Unix time when FPM has started or reloaded.
+# TYPE php_fpm_start_time_seconds gauge
+php_fpm_start_time_seconds{socket_path="/tmp/phpfpmtest.sock"} 1.547860664e+09
+# HELP php_fpm_up Whether scraping PHP-FPM's metrics was successful.
+# TYPE php_fpm_up gauge
+php_fpm_up{socket_path="/tmp/phpfpmtest.sock"} 1
