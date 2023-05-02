@@ -52,6 +52,10 @@ Help on flags
       -h, --help     Show context-sensitive help (also try --help-long and --help-man).
           --web.listen-address=":9253"
                      Address to listen on for web interface and telemetry.
+          --web.tls-cert=""
+                     [Optional] Path to TLS cert. Must be used with web.tls-key
+          --web.tls-key=""
+                     [Optional] Path to TLS key. Must be used with web.tls-cert
           --web.telemetry-path="/metrics"
                      Path under which to expose metrics.
           --phpfpm.socket-paths=PHPFPM.SOCKET-PATHS ...
