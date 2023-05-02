@@ -28,13 +28,13 @@ import (
 
 	"path/filepath"
 
+	"github.com/alecthomas/kingpin/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	client_model "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
 	"github.com/prometheus/common/version"
 	"github.com/tomasen/fcgi_client"
-	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
